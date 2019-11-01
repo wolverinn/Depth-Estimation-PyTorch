@@ -23,12 +23,22 @@ After you make sure the dataset can be loaded correctly, you can run ```fyn_main
 
 ## Architecture
 
+![Architecture](_v_images/20191101082005244_15658.jpg)
+
+
+
 ## Dataset
+We use the [NYU Depth V2 Dataset](https://cs.nyu.edu/~silberman/datasets/nyu_depth_v2.html) for training and testing. The RGB image and the depth image in the dataset are both of size 640x480. During training, the RGB image is loaded as 640x480 and the depth image is loaded and then resized to 160x120. The input of the network is a RGB image with size 640x480, and the output is a grayscale image of size 160x120, which is the depth map we need.
+
+NyuV2 dataset contains images of indoor scenes, which is a limitation for depth estimation on other scenes. You can check other dataset to include more scenes in your model.
 
 ## Loss Function
 We employed a self-defined loss function in our model -- the Depth Loss:
 
 ![img](https://latex.codecogs.com/gif.latex?L_%7B%5Ctextup%7Bdepth%7D%7D%20%3D%20%5Cfrac%7B1%7D%7Bn%7D%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20%5Csqrt%5B%5D%7B%5Clog%5E2%28d_i%29%20-%20%5Clog%5E2%28p_i%29%7D)
+
+## Results
+Here are some results on test dataset that contains scenes of basements:
 
 ## Reference
 - [Feature Pyramid Network](https://arxiv.org/abs/1612.03144)
@@ -36,3 +46,4 @@ We employed a self-defined loss function in our model -- the Depth Loss:
 - [ResNet101](http://ethereon.github.io/netscope/#/gist/b21e2aae116dc1ac7b50)
 - [深度学习之单目深度估计 (Chapter.1)：基础篇](https://zhuanlan.zhihu.com/p/29864012)
 - [基于深度学习的单目图像深度估计](https://www.cnblogs.com/jukan/p/10151898.html)
+- [Single-Image Depth Perception in the Wild](http://www-personal.umich.edu/~wfchen/depth-in-the-wild/)
