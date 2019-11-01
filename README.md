@@ -25,7 +25,12 @@ After you make sure the dataset can be loaded correctly, you can run ```fyn_main
 
 ![Architecture](_v_images/20191101082005244_15658.jpg)
 
-
+- Our architecture is basically a Feature Pyramid Network (FPN) with ResNet101 as backbone.
+- FPN is an effective backbone for monocular depth estimation because of its ability to extract features and semantics at different scales. It can achieve its potential if guided by proper loss functions.
+- Two consecutive 3x3 convolutions for feature processing.
+- ReLU is used as activation function in the last two convolutional layers. No non-linearity in the top-down branch of FPN.
+- Outputs prediction of size ¼.
+- Learning rate decay is deployed during training.
 
 ## Dataset
 We use the [NYU Depth V2 Dataset](https://cs.nyu.edu/~silberman/datasets/nyu_depth_v2.html) for training and testing. The RGB image and the depth image in the dataset are both of size 640x480. During training, the RGB image is loaded as 640x480 and the depth image is loaded and then resized to 160x120. The input of the network is a RGB image with size 640x480, and the output is a grayscale image of size 160x120, which is the depth map we need.
