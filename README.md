@@ -26,7 +26,7 @@ After you make sure the dataset can be loaded correctly, you can run ```fyn_main
 
 ## Architecture
 
-![Architecture](_v_images/20191101082005244_15658.jpg)
+![Architecture](https://upload-images.jianshu.io/upload_images/10634927-deef700b189634b9.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 - Our architecture is basically a Feature Pyramid Network (FPN) with ResNet101 as backbone.
 - FPN is an effective backbone for monocular depth estimation because of its ability to extract features and semantics at different scales. It can achieve its potential if guided by proper loss functions.
