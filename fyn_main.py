@@ -137,16 +137,6 @@ class RMSE_log(nn.Module):
         loss = torch.sqrt( torch.mean( torch.abs(torch.log(real+eps)-torch.log(fake+eps)) ** 2 ) )
         return loss
 
-class RMSE(nn.Module):
-    def __init__(self):
-        super(RMSE, self).__init__()
-    def forward(self, fake, real):
-        if not fake.shape == real.shape:
-            _,_,H,W = real.shape
-            fake = F.upsample(fake, size=(H,W), mode='bilinear')
-        loss = torch.sqrt( torch.mean( torch.abs(10.*real-10.*fake) ** 2 ) )
-        return loss
-
 if __name__ == '__main__':
     # hyperparams
     lr = 0.001
@@ -169,7 +159,6 @@ if __name__ == '__main__':
     # optimizer
     optimizer = torch.optim.Adam(i2d.parameters(), lr=lr, betas=(0.9, 0.999), eps=1e-08, weight_decay=4e-5)
     # evaluation loss function
-    rmse = RMSE()
     eval_metric = RMSE_log()
     # train loss
     depth_criterion = RMSE_log() # depth_criterion = nn.MSELoss()
@@ -193,7 +182,7 @@ if __name__ == '__main__':
             loss.backward()
             optimizer.step()
             if (i+1) % 50 == 0:
-                print("[epoch %2d][iter %4d] loss: %.4f RMSElog: %.4f" % (epoch, i, loss, depth_loss))
+                print("[epoch %2d][iter %4d] loss: %.4f RMSElog: %.4f" % (epoch, i, loss, loss))
         # save model
         torch.save(i2d.state_dict(),'{}/fyn_model.pt'.format(LOAD_DIR))
         end = time.time()
@@ -208,14 +197,11 @@ if __name__ == '__main__':
             i2d.eval()
             print('evaluating...')
             eval_loss = 0
-            rmse_accum = 0
             count = 0
             with torch.no_grad():
               for i,(data,z) in enumerate(eval_dataloader):
                   data,z = Variable(data.to(DEVICE)),Variable(z.to(DEVICE))
                   z_fake = i2d(data)
-                  depth_loss = float(data.size(0)) * rmse(z_fake, z).item()**2
-                  eval_loss += depth_loss
-                  rmse_accum += float(data.size(0)) * eval_metric(z_fake, z).item()**2
+                  eval_loss += float(data.size(0)) * eval_metric(z_fake, z).item()**2
                   count += float(data.size(0))
-            print("[epoch %2d] RMSE_log: %.4f RMSE: %.4f" % (epoch, math.sqrt(eval_loss/count), math.sqrt(rmse_accum/count)))
+            print("[epoch %2d] RMSE_log: %.4f" % (epoch, math.sqrt(eval_loss/count)))
