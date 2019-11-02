@@ -125,17 +125,35 @@ class NYUv2Dataset(data.Dataset):
     def __len__(self):
         return self.length
 
-class RMSE_log(nn.Module):
+class GradLoss(nn.Module):
     def __init__(self):
-        super(RMSE_log, self).__init__()
-    
-    def forward(self, fake, real):
-        if not fake.shape == real.shape:
-            _,_,H,W = real.shape
-            fake = F.upsample(fake, size=(H,W), mode='bilinear')
-        eps = 1e-8
-        loss = torch.sqrt( torch.mean( torch.abs(torch.log(real+eps)-torch.log(fake+eps)) ** 2 ) )
-        return loss
+        super(GradLoss, self).__init__()
+    # L1 norm
+    def forward(self, grad_fake, grad_real):
+        return torch.mean( torch.abs(grad_real-grad_fake) )
+
+def imgrad(img):
+    img = torch.mean(img, 1, True)
+    fx = np.array([[1,0,-1],[2,0,-2],[1,0,-1]])
+    conv1 = nn.Conv2d(1, 1, kernel_size=3, stride=1, padding=1, bias=False)
+    weight = torch.from_numpy(fx).float().unsqueeze(0).unsqueeze(0)
+    if img.is_cuda:
+        weight = weight.cuda()
+    conv1.weight = nn.Parameter(weight)
+    grad_x = conv1(img)
+    # grad y
+    fy = np.array([[1,2,1],[0,0,0],[-1,-2,-1]])
+    conv2 = nn.Conv2d(1, 1, kernel_size=3, stride=1, padding=1, bias=False)
+    weight = torch.from_numpy(fy).float().unsqueeze(0).unsqueeze(0)
+    if img.is_cuda:
+        weight = weight.cuda()
+    conv2.weight = nn.Parameter(weight)
+    grad_y = conv2(img)
+    return grad_y, grad_x
+def imgrad_yx(img):
+    N,C,_,_ = img.size()
+    grad_y, grad_x = imgrad(img)
+    return torch.cat((grad_y.view(N,C,-1), grad_x.view(N,C,-1)), dim=1)
 
 if __name__ == '__main__':
     # hyperparams
@@ -158,10 +176,8 @@ if __name__ == '__main__':
         print('Done!')
     # optimizer
     optimizer = torch.optim.Adam(i2d.parameters(), lr=lr, betas=(0.9, 0.999), eps=1e-08, weight_decay=4e-5)
-    # evaluation loss function
-    eval_metric = RMSE_log()
-    # train loss
-    depth_criterion = RMSE_log() # depth_criterion = nn.MSELoss()
+    # loss function
+    grad_criterion = GradLoss()
     # start training
     for epoch in range(0, 50):
         try:
@@ -171,18 +187,18 @@ if __name__ == '__main__':
         i2d.train()
         start = time.time()
         # learning rate decay
-        if epoch > 1:
+        if epoch > 5:
             for param_group in optimizer.param_groups:
                 param_group['lr'] = param_group['lr'] * 0.9
         for i,(data,z) in enumerate(train_dataloader):
             data,z = Variable(data.to(DEVICE)),Variable(z.to(DEVICE))
             optimizer.zero_grad()
             z_fake = i2d(data)
-            loss = depth_criterion(z_fake, z)
+            loss = grad_criterion(z_fake, z)
             loss.backward()
             optimizer.step()
             if (i+1) % 50 == 0:
-                print("[epoch %2d][iter %4d] loss: %.4f RMSElog: %.4f" % (epoch, i, loss, loss))
+                print("[epoch %2d][iter %4d] loss: %.4f" % (epoch, i, loss))
         # save model
         torch.save(i2d.state_dict(),'{}/fyn_model.pt'.format(LOAD_DIR))
         end = time.time()
@@ -202,6 +218,6 @@ if __name__ == '__main__':
               for i,(data,z) in enumerate(eval_dataloader):
                   data,z = Variable(data.to(DEVICE)),Variable(z.to(DEVICE))
                   z_fake = i2d(data)
-                  eval_loss += float(data.size(0)) * eval_metric(z_fake, z).item()**2
+                  eval_loss += float(data.size(0)) * grad_criterion(z_fake, z).item()**2
                   count += float(data.size(0))
             print("[epoch %2d] RMSE_log: %.4f" % (epoch, math.sqrt(eval_loss/count)))

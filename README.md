@@ -43,9 +43,11 @@ We use the [NYU Depth V2 Dataset](https://cs.nyu.edu/~silberman/datasets/nyu_dep
 NyuV2 dataset contains images of indoor scenes, which is a limitation for depth estimation on other scenes. You can check other dataset to include more scenes in your model.
 
 ## Loss Function
-We employed a self-defined loss function in our model -- the Depth Loss:
+We employed a self-defined loss function in our model -- the Gradient Loss:
 
-![img](https://latex.codecogs.com/gif.latex?L_%7B%5Ctextup%7Bdepth%7D%7D%20%3D%20%5Cfrac%7B1%7D%7Bn%7D%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20%5Csqrt%5B%5D%7B%5Clog%5E2%28d_i%29%20-%20%5Clog%5E2%28p_i%29%7D)
+![img](https://latex.codecogs.com/gif.latex?L_%7B%5Ctextup%7Bgrad%7D%7D%20%3D%20%5Cfrac%7B1%7D%7Bn%7D%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20%5Cbig%7C%5Cbig%7C%20%5Cnabla%20%5Ctextbf%7Bd%7D%20-%20%5Cnabla%20%5Ctextbf%7Bp%7D%20%5Cbig%7C%5Cbig%7C_1)
+
+The gradient of depth maps is obtained by a Sobel filter; the gradient loss is the L1 norm of the difference.
 
 ## Results
 Here are some results on test dataset that contains scenes of basements:
