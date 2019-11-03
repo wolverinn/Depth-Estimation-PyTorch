@@ -52,9 +52,9 @@ The gradient of depth maps is obtained by a Sobel filter; the gradient loss is t
 ## Results
 Here are some results on test dataset that contains scenes of basements:
 
-![Test Result 1](_v_images/20191103154806105_30644.png =854x)
+![Test Result 1](_v_images/20191103154806105_30644.png)
 
-![Test result 2](_v_images/20191103154514756_28480.png =854x)
+![Test result 2](_v_images/20191103154514756_28480.png)
 
 ## Reference
 - [Feature Pyramid Network](https://arxiv.org/abs/1612.03144)
