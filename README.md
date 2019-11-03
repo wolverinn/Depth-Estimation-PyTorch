@@ -4,7 +4,7 @@ Monocular depth estimation using Feature Pyramid Network implemented in PyTorch 
 ## To test the model I provide
 - Change your working directory to ```model-test```.
 - Unzip the ```nyuv2.rar``` to current directory.
-- Download the trained model from [this link]() and save ```fyn_model.pt``` to current directory.
+- Download the trained model from [this link](). Rename to ```fyn_model.pt``` and save to current directory.
 - Run the Jupyter Notebook in ```test.ipynb```.
 
 **Note**: the model I provide was trained only on a dataset containing 1k images of scenes in basements. The purpose of this model was only to test whether the network architecture works for depth estimation. The test dataset provided in ```model-test``` folder also contains only images of basements.
@@ -51,6 +51,10 @@ The gradient of depth maps is obtained by a Sobel filter; the gradient loss is t
 
 ## Results
 Here are some results on test dataset that contains scenes of basements:
+
+![Test Result 1](_v_images/20191103154806105_30644.png =854x)
+
+![Test result 2](_v_images/20191103154514756_28480.png =854x)
 
 ## Reference
 - [Feature Pyramid Network](https://arxiv.org/abs/1612.03144)

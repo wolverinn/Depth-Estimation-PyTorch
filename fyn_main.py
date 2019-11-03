@@ -194,7 +194,8 @@ if __name__ == '__main__':
             data,z = Variable(data.to(DEVICE)),Variable(z.to(DEVICE))
             optimizer.zero_grad()
             z_fake = i2d(data)
-            loss = grad_criterion(z_fake, z)
+            grad_real, grad_fake = imgrad_yx(z), imgrad_yx(z_fake)
+            loss = grad_criterion(grad_fake, grad_real)
             loss.backward()
             optimizer.step()
             if (i+1) % 50 == 0:
